@@ -75,4 +75,4 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
         env: 
-          TF_VAR_docker_password: ${{ DOCKER_PASSWORD }}
+          TF_VAR_docker_password: ${{ secrets.DOCKER_PASSWORD }}
