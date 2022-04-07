@@ -20,27 +20,33 @@ jobs:
         
       - name: Set AWS Credentials
         run: | 
-          export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
-          export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          export AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}"
+          mkdir -p .aws
+          echo "[main]" > .aws/credentials
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .aws/credentials
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"  >> .aws/credentials
         
       - name: Terraform Init
         id: init
         env: 
-          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
         run: terraform init
           
       - name: Terraform Format
         id: fmt
+        env: 
+          AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
         run: terraform fmt -check
           
       - name: Terraform Validate
         id: validate
+        env: 
+          AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
         run: terraform validate -no-color
         
       - name: Terraform Plan
         id: plan
+        env: 
+          AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
         run: terraform plan -no-color
         continue-on-error: true
         
@@ -80,5 +86,7 @@ jobs:
       #  run: exit 1
         
       - name: Terraform Apply
+        env: 
+          AWS_SHARED_CREDENTIALS_FILE: .aws/credentials
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
