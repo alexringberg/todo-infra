@@ -12,10 +12,6 @@ jobs:
   tf_fmt:
     name: Format Terraform
     runs-on: ubuntu-latest
-    env: 
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       - uses: hashicorp/setup-terraform@v1
@@ -24,6 +20,9 @@ jobs:
         
       - name: Terraform Init
         id: init
+        env: 
+          AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform init
           
       - name: Terraform Format
