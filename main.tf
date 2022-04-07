@@ -51,10 +51,10 @@ resource "aws_security_group" "todo-app-server-sg" {
   }
 
   ingress {
-      cidr_blocks = ["0.0.0.0/0"]
-      from_port = 8080
-      protocol = "tcp"
-      to_port = 8080
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 8080
+    protocol    = "tcp"
+    to_port     = 8080
   }
 
   egress {
@@ -64,10 +64,10 @@ resource "aws_security_group" "todo-app-server-sg" {
     to_port     = 0
   }
   egress {
-      cidr_blocks = ["0.0.0.0/0"]
-      from_port = 8080
-      protocol = "tcp"
-      to_port = 8080
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 8080
+    protocol    = "tcp"
+    to_port     = 8080
   }
 }
 
