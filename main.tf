@@ -21,7 +21,9 @@ provider "aws" {
 
 resource "aws_s3_bucket" "terraform-state" {
   bucket = "terraform-state-management-ringberg"
-  force_destroy = true
+  lifecycle {
+    prevent_destroy = true
+  }
   versioning {
     enabled = true
   }
