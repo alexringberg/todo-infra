@@ -24,7 +24,6 @@ resource "aws_s3_bucket" "terraform-state" {
   force_destroy = true
   versioning {
     enabled = true
-    mfa_delete = false
   }
 
   server_side_encryption_configuration {
