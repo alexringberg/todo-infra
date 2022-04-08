@@ -21,8 +21,10 @@ provider "aws" {
 
 resource "aws_s3_bucket" "terraform-state" {
   bucket = "terraform-state-management-ringberg"
+  force_destory = true
   versioning {
     enabled = true
+    mfa_delete = false
   }
 
   server_side_encryption_configuration {
