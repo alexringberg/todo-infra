@@ -13,14 +13,14 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-data "terraform_remote_state" "network" {
-  backend = "s3"
-  config = {
-    bucket = "terraform-state-management-ringberg"
-    key    = "network/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
+# data "terraform_remote_state" "network" {
+#   backend = "s3"
+#   config = {
+#     bucket = "terraform-state-management-ringberg"
+#     key    = "network/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
 
 resource "aws_s3_bucket" "terraform-state" {
   bucket = "terraform-state-management-ringberg"
