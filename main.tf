@@ -1,4 +1,10 @@
 terraform {
+  backend "s3" {
+    bucket  = "terraform-state-management-ringberg"
+    key     = "state/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
+  }
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -11,15 +17,6 @@ terraform {
 provider "aws" {
   profile = "default"
   region  = "us-east-1"
-}
-
-data "terraform_remote_state" "network" {
-  backend = "s3"
-  config = {
-    bucket = "terraform-state-management-ringberg"
-    key    = "network/terraform.tfstate"
-    region = "us-east-1"
-  }
 }
 
 resource "aws_s3_bucket" "terraform-state" {
@@ -35,7 +32,15 @@ resource "aws_s3_bucket" "terraform-state" {
       }
     }
   }
+}
 
+resource "aws_s3_bucket_public_access_block" "block" {
+  bucket = aws_s3_bucket.terraform-state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_instance" "todo-app-server" {
