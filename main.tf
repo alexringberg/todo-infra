@@ -1,4 +1,3 @@
-variable "docker_password" {}
 terraform {
   required_providers {
     aws = {
