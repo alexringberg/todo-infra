@@ -13,6 +13,31 @@ provider "aws" {
   region  = "us-east-1"
 }
 
+# data "terraform_remote_state" "network" {
+#   backend = "s3"
+#   config = {
+#     bucket = "terraform-state-management-ringberg"
+#     key    = "network/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+
+resource "aws_s3_bucket" "terraform-state" {
+  bucket = "terraform-state-management-ringberg"
+  versioning {
+    enabled = true
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+
+}
+
 resource "aws_instance" "todo-app-server" {
   ami                         = "ami-0c02fb55956c7d316"
   instance_type               = "t2.micro"
@@ -113,3 +138,5 @@ resource "aws_route_table_association" "main-route-table-association" {
   subnet_id      = aws_subnet.main-subnet.id
   route_table_id = aws_route_table.main-route-table.id
 }
+
+
