@@ -20,7 +20,6 @@ provider "aws" {
 }
 
 resource "aws_acm_certificate" "default" {
-  provider = "aws.acm"
   domain_name = "spring-api.alexringberg.com"
   validation_method = "DNS"
   lifecycle {
@@ -37,7 +36,6 @@ resource "aws_route53_record" "validation" {
 }
 
 resource "aws_acm_certificate_validation" "default" {
-  provider = "aws.acm"
   certificate_arn = "${aws_acm_certificate.default.arn}"
   validation_record_fqdns = [
     "${aws_route53_record.validation.fqdn}",
