@@ -27,24 +27,22 @@ resource "aws_acm_certificate" "default" {
   }
 }
 
-resource "aws_route53_record" "validation" {
+resource "aws_route53_record" "default" {
   zone_id = "Z047688434K2RNVMN4AG8"
-  name    = aws_acm_certificate.default.domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.default.domain_validation_options.0.resource_record_type
-  records = ["${aws_acm_certificate.default.domain_validation_options.0.resource_record_value}"]
+  name    = "spring-api.alexringberg.com"
+  type    = "A"
+  records = [aws_eip.todo-app-server-ip.public_ip]
   ttl     = "300"
 }
 
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn = aws_acm_certificate.default.arn
-  validation_record_fqdns = [
-    "${aws_route53_record.validation.fqdn}",
-  ]
+  validation_record_fqdns = [for record in aws_route53_record.default : record.fqdn]
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
   viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.default.0.arn
+    acm_certificate_arn = aws_acm_certificate.default.arn
   }
 }
 
