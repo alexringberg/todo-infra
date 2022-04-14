@@ -19,11 +19,6 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-provider "aws" {
-  alias = "acm"
-  region = "us-east-1"
-}
-
 resource "aws_acm_certificate" "default" {
   provider = "aws.acm"
   domain_name = "spring-api.alexringberg.com"
