@@ -18,6 +18,12 @@ provider "aws" {
   region  = "us-east-1"
 }
 
+data "aws_route53_zone" "public"{
+  name = var.demo_dns_zone
+  private_zone = false
+  provider = aws.account_route53
+}
+
 resource "aws_s3_bucket" "terraform-state" {
   bucket = "terraform-state-management-ringberg"
   versioning {
@@ -31,6 +37,29 @@ resource "aws_s3_bucket" "terraform-state" {
       }
     }
   }
+}
+
+resource "aws_acm_certificate" "ssl-cert" {
+  domain_name = aws_route53_record.dns-record.fqdn
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "dns-record"{
+  allow_overwrite = true
+  name = tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_name
+  records = [tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_value ]
+  type = tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_type
+  zone_id = data.aws_route53_zome.public.id
+  ttl = 60
+  provider = aws.account_route53
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn = aws_acm_certificate.ssl-cert.arn
+  validation_record_fqdns = [ aws_route53_record.dns-record.fqdn ]
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {
@@ -80,9 +109,23 @@ resource "aws_security_group" "todo-app-server-sg" {
 
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 443
+    protocol    = "tcp"
+    to_port     = 443
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
     from_port   = 8080
     protocol    = "tcp"
     to_port     = 8080
+  }
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 443
+    protocol    = "tcp"
+    to_port     = 443
   }
 
   egress {
