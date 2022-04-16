@@ -34,53 +34,6 @@ resource "aws_s3_bucket" "terraform-state" {
   }
 }
 
-resource "aws_acm_certificate" "ssl-cert" {
-  domain_name       = "spring-api.alexringberg.com"
-  private_key       = tls_private_key.tls-key.private_key_pem
-  certificate_body  = tls_self_signed_cert.self-signed.cert_pem
-  validation_method = "DNS"
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "tls_private_key" "tls-key" {
-  algorithm = "RSA"
-}
-
-resource "tls_self_signed_cert" "self-signed" {
-  key_algorithm   = "RSA"
-  private_key_pem = tls_private_key.tls-key.private_key_pem
-
-  subject {
-    common_name  = "spring-api.alexringberg.com"
-    organization = "Ringberg Development"
-  }
-
-  validity_period_hours = 12
-
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
-}
-
-resource "aws_acm_certificate_validation" "cert" {
-  certificate_arn         = aws_acm_certificate.ssl-cert.arn
-  validation_record_fqdns = [aws_route53_record.dns-record.fqdn]
-}
-
-resource "aws_route53_record" "dns-record" {
-  allow_overwrite = true
-  name            = tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_name
-  records         = [tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_value]
-  type            = tolist(aws_acm_certificate.ssl-cert.domain_validation_options)[0].resource_record_type
-  zone_id         = "Z047688434K2RNVMN4AG8"
-  ttl             = 60
-  provider        = aws
-}
-
 resource "aws_s3_bucket_public_access_block" "block" {
   bucket = aws_s3_bucket.terraform-state.id
 
