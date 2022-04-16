@@ -13,41 +13,28 @@ terraform {
   }
   required_version = ">= 0.14.9"
 }
-
 provider "aws" {
   profile = "default"
   region  = "us-east-1"
 }
 
-resource "aws_acm_certificate" "default" {
-  domain_name       = "spring-api.alexringberg.com"
-  validation_method = "DNS"
-  lifecycle {
-    create_before_destroy = true
+resource "aws_s3_bucket" "terraform-state" {
+  bucket = "terraform-state-management-ringberg"
+  versioning {
+    enabled = true
   }
-}
 
-resource "aws_route53_record" "default" {
-  zone_id = "Z047688434K2RNVMN4AG8"
-  name    = "spring-api.alexringberg.com"
-  type    = "A"
-  records = [aws_eip.todo-app-server-ip.public_ip]
-  ttl     = "300"
-}
-
-resource "aws_acm_certificate_validation" "default" {
-  certificate_arn         = aws_acm_certificate.default.arn
-  validation_record_fqdns = [for record in aws_route53_record.default : record.fqdn]
-}
-
-resource "aws_cloudfront_distribution" "cdn" {
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.default.arn
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
   }
 }
 
 resource "aws_s3_bucket_public_access_block" "block" {
-  bucket = "terraform-state-management-ringberg"
+  bucket = aws_s3_bucket.terraform-state.id
 
   block_public_acls       = true
   block_public_policy     = true
